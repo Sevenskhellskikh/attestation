@@ -1,0 +1,121 @@
+In [1]: models.News.objects.all()
+Out[1]: <QuerySet [<News: Новость 3>, <News: Новость 2>, <News: Новость 1>]>
+
+In [2]: models.News.objects.values_list('id', 'title')
+Out[2]: <QuerySet [(3, 'Новость 3'), (2, 'Новость 2'), (1, 'Новость 1')]>
+
+In [3]: models.News.objects.filter(category__title='Политика')
+Out[3]: <QuerySet [<News: Новость 1>]>
+
+In [4]: models.Origin.objects.exclude(news__title='Новость 3')
+Out[4]: <QuerySet [<Origin: Источник 1>, <Origin: Источник 3>, <Origin: Источник 4>]>
+
+In [5]: news = models.News.objects.annotate(Count('likes'))
+In [6]: news[0].likes__count
+Out[6]: 11
+
+In [7]: models.News.objects.aggregate(Avg('likes'))
+Out[7]: {'likes__avg': 17.0}
+
+In [8]: news = models.News.objects.alias(likes_number=Count('likes')).filter(likes__gt=20)
+Out[8]: <QuerySet [<News: Новость 3>]>
+
+In [9]: models.News.objects.order_by('origin')
+Out[9]: <QuerySet [<News: Новость 1>, <News: Новость 3>, <News: Новость 2>]>
+
+In [10]: models.Category.objects.values()
+Out[10]: <QuerySet [{'id': 8, 'title': 'Видеоигры'}, {'id': 7, 'title': 'Наука'}, {'id': 6, 'title': 'Политика'}, {'id': 5, 'title': 'Спорт'}]>
+
+In [11]: models.News.objects.dates('created_at', 'day')
+Out[11]: <QuerySet [datetime.date(2023, 7, 19)]>
+
+In [12]: models.News.objects.datetimes('created_at', 'hour')
+Out[12]: <QuerySet [datetime.datetime(2023, 7, 19, 13, 0, tzinfo=zoneinfo.ZoneInfo(key='UTC'))]>
+
+In [13]: models.News.objects.none()
+Out[13]: <QuerySet []>
+
+In [14]: models.News.objects.defer('photo', 'content')
+Out[14]: <QuerySet [<News: Новость 3>, <News: Новость 2>, <News: Новость 1>]>
+
+In [15]: models.News.objects.only('likes')
+Out[15]: <QuerySet [<News: Новость 3>, <News: Новость 2>, <News: Новость 1>]>
+
+In [16]: origin = models.Origin.objects.get(pk=3)
+In [17]: news = models.News.objects.create(title='Новость из shell', origin=origin, likes=228)
+In [18]: news
+Out[18]: <News: Новость из shell>
+
+In [19]: category = models.Category(title='Программирование')
+In [20]: category.save()
+In [21]: category
+Out[21]: <Category: Программирование>
+
+In [22]: models.Category.objects.get_or_create(title='Программирование')
+Out[22]: (<Category: Программирование>, False)
+
+In [23]: models.News.objects.update_or_create(likes=10, origin=origin, defaults={'title': 'Новая запись', 'likes': 0})
+Out[23]: (<News: Новая запись>, True)
+
+In [24]: models.Origin.objects.bulk_create([origin1, origin2, origin3])
+Out[24]:
+[<Origin: Источник из shell 1>,
+ <Origin: Источник из shell 2>,
+ <Origin: Источник из shell 3>]
+
+In [25]: news_origins = [models.Origin.objects.create(title='Источник 6'), models.Origin.objects.create(title='Источник 7')]
+In [26]: news_origins[0].title = 'Истоник из shell 4'
+In [27]: news_origins[1].title = 'Истоник из shell 5'
+In [28]: models.Origin.objects.bulk_update(news_origins, ['title'])
+Out[28]: 2
+
+In [29]: models.News.objects.in_bulk([2, 3, 4])
+Out[29]: {2: <News: Новость 2>, 3: <News: Новость 3>, 4: <News: Новость из shell>}
+
+In [30]: models.News.objects.latest('created_at')
+Out[30]: <News: Новая запись>
+
+In [31]: models.News.objects.filter(title__icontains='sH')
+Out[31]: <QuerySet [<News: Новость из shell>, <News: Новость из shell>]>
+
+In [32]: models.News.objects.filter(title__exact='Новая запись')
+Out[32]: <QuerySet [<News: Новая запись>, <News: Новая запись>]>
+
+In [33]: models.Category.objects.filter(news__pk__in=[1, 3, 5])
+Out[33]: <QuerySet [<Category: Видеоигры>, <Category: Наука>, <Category: Политика>, <Category: Спорт>]>
+
+In [34]: models.News.objects.filter(title__startswith='Новость')
+Out[34]: <QuerySet [<News: Новость из shell>, <News: Новость из shell>, <News: Новость 3>, <News: Новость 2>, <News: Новость 1>]>
+
+In [35]: models.News.objects.filter(pk__lte=3)
+Out[35]: <QuerySet [<News: Новость 3>, <News: Новость 2>, <News: Новость 1>]>
+
+In [36]: models.News.objects.filter(title__isnull=False)
+Out[36]: <QuerySet [<News: Новая запись>, <News: Новая запись>, <News: Новость из shell>, <News: Новость из shell>, <News: Новость 3>, <News: Новость 2>, <News: Новость 1>]>
+
+In [37]: models.News.objects.filter(Q(title__contains='Новость') & Q(pk__gte=2))
+Out[37]: <QuerySet [<News: Новость из shell>, <News: Новость из shell>, <News: Новость 3>, <News: Новость 2>]>
+
+In [38]: print(models.News.objects.filter(title__icontains='sH').explain())
+3 0 0 SCAN core_news
+20 0 0 USE TEMP B-TREE FOR ORDER BY
+
+In [39]: queryset = models.News.objects.select_related('origin').filter(pk__gte=3)
+In [40]: queryset[0].origin
+Out[40]: <Origin: Источник 3>
+
+In [41]: queryset = models.News.objects.prefetch_related('category').get(pk=2)
+In [42]: queryset.category.all()
+Out[42]: <QuerySet [<Category: Спорт>]>
+
+In [43]: models.News.objects.earliest('created_at')
+Out[43]: <News: Новость 1>
+
+In [44]: models.News.objects.first()
+Out[44]: <News: Новая запись>
+
+In [45]: models.News.objects.last()
+Out[45]: <News: Новость 1>
+
+In [46]: models.News.objects.exists()
+Out[46]: True
