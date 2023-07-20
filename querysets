@@ -119,3 +119,28 @@ Out[45]: <News: Новость 1>
 
 In [46]: models.News.objects.exists()
 Out[46]: True
+
+In [47]: models.News.objects.filter(pk__range=[2, 4])
+Out[47]: <QuerySet [<News: news 3>, <News: form news>, <News: news 2>]>
+
+In [48]: models.News.objects.filter(title__endswith='news')
+Out[48]: <QuerySet [<News: form news>]>
+
+In [49]: models.News.objects.filter(title__iendswith='s')
+Out[49]: <QuerySet [<News: newS NewS>, <News: form news>]>
+
+In [50]: models.News.objects.filter(title__istartswith='f')
+Out[50]: <QuerySet [<News: Few-few?>, <News: form news>]>
+
+In [51]: models.News.objects.filter(title__iexact='news 3')
+Out[51]: <QuerySet [<News: News 3>, <News: news 3>]>
+
+In [52]: models.News.objects.filter(likes__lt=200)
+Out[52]: <QuerySet [<News: newS NewS>, <News: I had no idea how to name this one>, <News: news 3>, <News: form news>, <News: news 2>, <News: news 1>]>
+
+In [53]: models.News.objects.filter(likes__lte=3)
+Out[53]: <QuerySet [<News: newS NewS>, <News: news 3>, <News: form news>, <News: news 2>]>
+
+In [54]: models.News.objects.filter(title__in=['news 3', 'news 1'])
+Out[54]: <QuerySet [<News: news 3>, <News: news 1>]>
+
