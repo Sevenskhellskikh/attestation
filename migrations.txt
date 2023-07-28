@@ -1,0 +1,109 @@
+===== COMMITTED MIGRATION =====
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py migrate
+    Operations to perform:
+      Apply all migrations: admin, auth, contenttypes, core, sessions
+    Running migrations:
+      Applying core.0004_change_title_to_name... OK
+
+
+===== REVERTED LAST MIGRATION =====
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py migrate core 0003
+    Operations to perform:
+      Target specific migration: 0003_news_likes, from core
+    Running migrations:
+      Rendering model states... DONE
+      Unapplying core.0004_change_title_to_name... OK
+
+
+===== REVERTED ALL MIGRATIONS =====
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py migrate core zero
+    Operations to perform:
+      Unapply all migrations: core
+    Running migrations:
+      Rendering model states... DONE
+      Unapplying core.0003_news_likes... OK
+      Unapplying core.0002_alter_news_options_alter_news_category_and_more... OK
+      Unapplying core.0001_initial... OK
+
+===== SHOW MIGRATIONS =====
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py showmigrations
+    admin
+     [X] 0001_initial
+     [X] 0002_logentry_remove_auto_add
+     [X] 0003_logentry_add_action_flag_choices
+    auth
+     [X] 0001_initial
+     [X] 0002_alter_permission_name_max_length
+     [X] 0003_alter_user_email_max_length
+     [X] 0004_alter_user_username_opts
+     [X] 0005_alter_user_last_login_null
+     [X] 0006_require_contenttypes_0002
+     [X] 0007_alter_validators_add_error_messages
+     [X] 0008_alter_user_username_max_length
+     [X] 0009_alter_user_last_name_max_length
+     [X] 0010_alter_group_name_max_length
+     [X] 0011_update_proxy_permissions
+     [X] 0012_alter_user_first_name_max_length
+    contenttypes
+     [X] 0001_initial
+     [X] 0002_remove_content_type_name
+    core
+     [ ] 0001_initial
+     [ ] 0002_alter_news_options_alter_news_category_and_more
+     [ ] 0003_news_likes
+     [ ] 0004_change_title_to_name
+    sessions
+     [X] 0001_initial
+
+===== DATA MIGRATIONS =====
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py makemigrations --empty core --name data_migration_1
+    Migrations for 'core':
+      core/migrations/0005_data_migration_1.py
+
+    -----------------------------------------------------
+    from django.db import migrations
+
+
+    def fill_news_table(apps, schema_editor):
+
+        news = apps.get_model('core', 'News')
+        origin = apps.get_model('core', 'Origin')
+        origin_instance = origin.objects.first()
+
+        db_alias = schema_editor.connection.alias
+        for i in range(1, 5):
+            news.objects.using(db_alias).create(
+                name=f'Новость {i}',
+                likes=i,
+                origin=origin_instance,
+            )
+
+
+    class Migration(migrations.Migration):
+
+        dependencies = [
+            ('core', '0001_initial'),
+        ]
+
+        operations = [
+            migrations.RunPython(fill_news_table)
+        ]
+    -----------------------------------------------------
+
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py migrate
+    Operations to perform:
+      Apply all migrations: admin, auth, contenttypes, core, sessions
+    Running migrations:
+      Applying core.0002_data_migration_1... OK
+
+
+===== SQUASHED MIGRATIONS =====
+    (venv) v@ARCH:~/PycharmProjects/attestation/attestation$ python manage.py squashmigrations core 0003
+    Will squash the following migrations:
+     - 0001_initial
+     - 0002_alter_category_options_alter_origin_options_and_more
+     - 0003_alter_news_options_alter_origin_options
+    Do you wish to proceed? [yN] y
+    Optimizing...
+      Optimized from 11 operations to 4 operations.
+    Created new squashed migration /home/v/PycharmProjects/attestation/attestation/core/migrations/0001_squashed_0003_alter_news_options_alter_origin_options.py

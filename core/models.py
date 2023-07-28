@@ -2,7 +2,7 @@ from django.db import models
 
 
 class News(models.Model):
-    title = models.CharField('Имя', max_length=150)
+    name = models.CharField('Имя', max_length=150)
     content = models.TextField('Контент', blank=True)
     likes = models.IntegerField()
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
@@ -22,7 +22,7 @@ class News(models.Model):
     )
 
     def __str__(self):
-        return self.title
+        return self.name
 
     class Meta:
         verbose_name = 'Новость'
@@ -31,27 +31,27 @@ class News(models.Model):
 
 
 class Category(models.Model):
-    title = models.CharField('Имя категории', max_length=150, db_index=True)
+    name = models.CharField('Имя категории', max_length=150, db_index=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ['title']
+        ordering = ['name']
 
 
 class Origin(models.Model):
-    title = models.CharField('Имя источника', max_length=150)
+    name = models.CharField('Имя источника', max_length=150)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     class Meta:
         verbose_name = 'Источник'
         verbose_name_plural = 'Источники'
-        ordering = ['title']
+        ordering = ['name']
 
 
 class OrderedContent(News):
